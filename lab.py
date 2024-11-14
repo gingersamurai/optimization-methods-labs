@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 
 
 class HookaJeeves:
-    def __init__(self, object_func: Callable[[List[float]], float], start_point: List[float], start_step_len: float, eps: float, lambd: float, alph: float):
+    def __init__(self, object_func: Callable, start_point: np.array, start_step_len: np.array, eps: float, lambd: float, alph: float):
         self.object_func = object_func
-        self.start_point = copy.copy(start_point)
-        self.start_step_len = start_step_len
+        self.start_point = np.copy(start_point)
+        self.start_step_len = np.copy(start_step_len)
         self.eps = eps
         self.lambd = lambd
         self.alph = alph
@@ -20,7 +20,7 @@ class HookaJeeves:
     def explore_search(self, base_point: List[float], step_len: List[float]) -> List[float]:
         base_val = self.object_func(*base_point)
         
-        res_point = copy.copy(base_point)
+        res_point = np.copy(base_point)
         for coord in range(len(base_point)):            
             res_point[coord] += step_len[coord]
 
@@ -34,27 +34,27 @@ class HookaJeeves:
         
         return res_point
 
-    def pattern_search_step(self, prev_point: List[float], cur_point: List[float]) -> List[float]:
+    def pattern_search_step(self, prev_point: np.array, cur_point: np.array) -> np.array:
         cand_point = copy.copy(cur_point)
         for coord in range(len(cur_point)):
             cand_point[coord] += self.lambd * (cur_point[coord] - prev_point[coord])
 
         return cand_point
     
-    def can_decrease_step(self, step_len: List[float]) -> bool:
+    def can_decrease_step(self, step_len: np.array) -> bool:
         for coord in range(len(step_len)):
             if step_len[coord] >= self.eps:
                 return True
             
         return False
 
-    def decrease_step(self, step_len: List[float]) -> None:
+    def decrease_step(self, step_len: np.array) -> None:
         for coord in range(len(step_len)):
             if step_len[coord] >= self.eps:
                 step_len[coord] /= self.alph
         
 
-    def solve(self) -> List[List[float]]:
+    def solve(self) -> List[np.array]:
         step_len = self.start_step_len
         result_points = [self.start_point]
         base_point = self.start_point
@@ -87,23 +87,25 @@ class HookaJeeves:
 
 
 # Определяем функцию f(x1, x2)
-def f(x1, x2):
-    return (x1 + 1)**2 + x2**2
+def f(x1: np.array, x2: np.array):
+    return np.square(x1 + 1) + np.square(x2)
 
 
 # Создаем сетку значений x1 и x2
-x1 = np.linspace(-10, 10, 100)
-x2 = np.linspace(-10, 10, 100)
-X1, X2 = np.meshgrid(x1, x2)
+x1 = np.linspace(-10, 10, 10)
+x2 = np.linspace(-10, 10, 10)
+X_tuple = np.meshgrid(x1, x2)
+
+X = np.array(X_tuple).reshape(2, -1).T
 
 # Вычисляем значения функции на сетке
-FX = f(X1, X2)
+FX = f(X[:, 0], X[:, 1])
 
 fig = plt.figure(figsize=(8, 6))
 
 # Строим график функции
 ax = fig.add_subplot(2, 3, 2, projection='3d')
-ax.plot_surface(X1, X2, FX, cmap='viridis')
+ax.plot_trisurf(X[:, 0], X[:, 1], FX)
 # Настройки графика
 ax.set_xlabel('x1')
 ax.set_ylabel('x2')
@@ -127,7 +129,6 @@ ax.set_ylim(-11, 11)
 ax.set_title('минимизация с помощью метода Хука-Дживса')
 
 
-# ax.plot_surface(X1, X2, FX * 2, cmap='viridis')
 
 
 
