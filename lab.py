@@ -78,7 +78,8 @@ class HookaJeeves:
             explored_after_search_val = self.object_func(*explored_after_search_point)
             if explored_after_search_val < new_base_val:
                 base_point = explored_after_search_point 
-            
+            else:
+                base_point = new_base_point
 
 
             
